@@ -12,17 +12,28 @@ const btnNew = document.querySelector('.btn--new');
 const btnRoll = document.querySelector('.btn--roll');
 const btnHold = document.querySelector('.btn--hold');
 
-let currentScore = 0;
-let activePlayer = 0;
-const scores = [0, 0];
+let currentScore, activePlayer, scores, playing;
 
 // condiciones de inicio:
-score0.textContent = 0;
-score1.textContent = 0;
-current0.textContent = 0;
-current1.textContent = 0;
+const init = function() {
+    currentScore = 0;
+    activePlayer = 0;
+    scores = [0, 0];
+    playing = true;
 
-diceElement.classList.add('hidden'); // esconde el dado
+    diceElement.classList.add('hidden'); // esconde el dado
+
+    current0.textContent = 0;
+    current1.textContent = 0;
+    score0.textContent = 0;
+    score1.textContent = 0;
+
+    player0.classList.remove('player--winner');
+    player1.classList.remove('player--winner');
+    player0.classList.add('player--active');
+    player1.classList.remove('player--active');
+};
+init();
 
 const switchPlayer = function() {
     document.getElementById(`current--${activePlayer}`).textContent = 0;
@@ -33,45 +44,51 @@ const switchPlayer = function() {
 };
 
 btnRoll.addEventListener('click', function() {
-    // 1.- Necesito que el dado muestre numeros al azar
-    const dice = Math.trunc(Math.random() * 6) + 1;
-    console.log(dice);
-
-    // 2.- Que se muestre el dado
-    diceElement.classList.remove('hidden'); // remueve la clase hidden para que se pueda ver el dado
-    diceElement.src = `dice-${dice}.png` // de esta manera podemos cargar dinamicamente una de las 6 imagnes del dado
-
-    // 3.- Si el dado muestra el numero 1, cambiar de jugador.
-    if (dice !== 1) { //si el dado es diferente a 1, entonces:
-        // añadir el valor del dado a la puntuacion actual
-        currentScore = currentScore + dice; 
-        document.getElementById(`current--${activePlayer}`).textContent = currentScore; // seleccionamos el elemento de la puntuacion de manera dinamica, en funcion de cual es el jugador activo.
-    } else {
-        // cambia de jugador
-        switchPlayer();
+    if(playing) {
+        // 1.- Necesito que el dado muestre numeros al azar
+        const dice = Math.trunc(Math.random() * 6) + 1;
+        console.log(dice);
+    
+        // 2.- Que se muestre el dado
+        diceElement.classList.remove('hidden'); // remueve la clase hidden para que se pueda ver el dado
+        diceElement.src = `dice-${dice}.png` // de esta manera podemos cargar dinamicamente una de las 6 imagnes del dado
+    
+        // 3.- Si el dado muestra el numero 1, cambiar de jugador.
+        if (dice !== 1) { //si el dado es diferente a 1, entonces:
+            // añadir el valor del dado a la puntuacion actual
+            currentScore = currentScore + dice; 
+            document.getElementById(`current--${activePlayer}`).textContent = currentScore; // seleccionamos el elemento de la puntuacion de manera dinamica, en funcion de cual es el jugador activo.
+        } else {
+            // cambia de jugador
+            switchPlayer();
+        }
     }
 });
 
 
 btnHold.addEventListener('click', function() {
-    // Agregar la puntuacion actual al jugador que este activo
-    scores[activePlayer] += currentScore;   // esto seria asi: scores[1] = scores[1] + currentScore;
-    document.getElementById(`score--${activePlayer}`).textContent = scores[activePlayer];
+    if(playing) {
+        // Agregar la puntuacion actual al jugador que este activo
+        scores[activePlayer] += currentScore;   // esto seria asi: scores[1] = scores[1] + currentScore;
+        document.getElementById(`score--${activePlayer}`).textContent = scores[activePlayer];
+    
+    
+        // Comprobar si la puntuacion del jugador es mayor o igual a 100
+        if (scores[activePlayer] >= 20) {
+            //Termina el juego
+            playing = false;
+            document.querySelector(`.player--${activePlayer}`).classList.add('player--winner');
+            document.querySelector(`.player--${activePlayer}`).classList.remove('player--active');
+        } else {
+            // Cambiar al siguiente jugador
+            switchPlayer();
+        }
 
-
-    // Comprobar si la puntuacion del jugador es mayor o igual a 100
-    if (scores[activePlayer] >= 20) {
-        //Termina el juego
-        document.querySelector(`player--${activePlayer}`).classList.add('player--winner');
-        document.querySelector(`player--${activePlayer}`).classList.remove('player--active');
-    } else {
-        // Cambiar al siguiente jugador
-        switchPlayer();
     }
 
 
 });
 
-
+btnNew.addEventListener('click', init);
 
 
